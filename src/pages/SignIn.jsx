@@ -1,15 +1,28 @@
 import React, { useState } from 'react'
 import { darkLogo } from '../assets'
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { motion } from 'framer-motion';
+import { RotatingLines } from  'react-loader-spinner'
+
 
 const SignIn = () => {
+  const auth = getAuth();
+  const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
   //Error message
   const [errEmail, setErrEmail] = useState("");
   const [errPassword, setErrPassword] = useState("");
+
+  //Firebase error
+  const [userInvalid, setUserInvalid] = useState("")
+
+  //Loading state
+  const [loading, setLoading] = useState(false)
+  const [successMsg, setSuccessMsg] = useState("")
 
   //Handle function
   const handleEmail = (e)=>{
@@ -19,6 +32,7 @@ const SignIn = () => {
   const handlePassword = (e)=>{
     setPassword(e.target.value)
     setErrPassword("")
+    setUserInvalid("")
   }
 
   //Email validation 
@@ -42,6 +56,25 @@ const SignIn = () => {
     }
 
     if(email && emailValidation(email) && password){
+      setLoading(true)
+      signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in 
+        const user = userCredential.user;
+        console.log(user);
+        setLoading(false)
+        setSuccessMsg("Logged in succesfully!")
+        setTimeout(() => {
+          navigate("/")
+        }, 2000);
+        // ...
+      })
+      .catch((error) => {
+        setLoading(false)
+        const errorCode = error.code;  
+        console.log(errorCode);     
+        setUserInvalid("Invalid login credentials")
+      });
       setEmail("")
       setPassword("")
     }
@@ -81,6 +114,16 @@ const SignIn = () => {
                               {errPassword}
                             </p>
                             )}
+                            {
+                              userInvalid && (
+                                <p className="text-red-600 text-xs font-semibold tracking-wide flex items-center gap-2 -mt-1.5">
+                                <span className="italic font-titleFont font-extrabold text-base">
+                                  !
+                                </span>
+                                {userInvalid}
+                              </p>
+                              )
+                            }
                         </div>
                         <button
                         onClick={handleSignIn}
@@ -88,6 +131,30 @@ const SignIn = () => {
                         >
                         Continue
                         </button>
+                        {
+                          loading && (
+                            <div className='flex justify-center'>
+                              <RotatingLines
+                                strokeColor="#febd69"
+                                strokeWidth="5"
+                                animationDuration="0.75"
+                                width="50"
+                                visible={true}
+                              />
+                            </div>
+                          )
+                        }
+                        {
+                          successMsg && (
+                            <div>
+                              <motion.p
+                              initial={{ y:10, opacity:0}}
+                              animate={{ y:0, opacity:1}}
+                              transition={{ duration: 0.5}}
+                              className='text-base font-titleFont font-semibold text-green-500 border-[1px] border-green-500 px-2 text-center'>{successMsg}</motion.p>
+                            </div>
+                          )
+                        }
                     </div>
                     <p className="text-xs text-black leading-4 mt-4">
                         By Continuing, you agree to Amazon's{" "}
