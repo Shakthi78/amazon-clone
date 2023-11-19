@@ -5,11 +5,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { motion } from 'framer-motion';
 import { RotatingLines } from  'react-loader-spinner'
+import { useDispatch } from 'react-redux';
+import { setUserInfo } from '../redux/amazonSlice';
 
 
 const SignIn = () => {
   const auth = getAuth();
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
@@ -61,7 +64,11 @@ const SignIn = () => {
       .then((userCredential) => {
         // Signed in 
         const user = userCredential.user;
-        console.log(user);
+        dispatch(setUserInfo({
+          _id:user.uid,
+          userName:user.displayName,
+          email:user.email
+        }))
         setLoading(false)
         setSuccessMsg("Logged in succesfully!")
         setTimeout(() => {
@@ -83,7 +90,10 @@ const SignIn = () => {
     <div className='w-full'>
         <div className='w-full bg-gray-100 '>
             <form className='w-[350px] mx-auto flex flex-col items-center'>
+              
+              <Link to="/">
                 <img className='w-32' src={darkLogo} alt=""/>
+              </Link>
                 <div className='w-full border border-zinc-200 p-6'>
                     <h2 className='font-titleFont text-3xl fot-medium mb-4'>Sign in</h2>
                     <div className="flex flex-col gap-3">

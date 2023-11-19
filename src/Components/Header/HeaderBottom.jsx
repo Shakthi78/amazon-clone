@@ -5,10 +5,13 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SideNavContent from './SideNavContent';
 import {motion} from "framer-motion"
 import { useRef } from 'react';
+import { useSelector } from 'react-redux';
 
 const HeaderBottom = () => {
     const ref = useRef()
     const [sideBar, setSideBar] = useState(false)
+    const user = useSelector((state)=>state.amazon.userInfo)
+
 
     useEffect(()=>{
         document.body.addEventListener("click", (e)=>{
@@ -38,9 +41,18 @@ const HeaderBottom = () => {
             <div className='w-full h-screen text-black fixed top-0 left-0 bg-[#121212] bg-opacity-70'>
                 <div className='w-full h-full relative'>
                 <motion.div ref={ref} initial={{x:-500, opacity: 0}} animate={{x:0, opacity:1}} transition={{duration:.5}} className='w-[70%] md:w-[350px] h-full bg-white border-black'>
-                    <div className='w-full bg-amazon_light text-white py-3 px-6 flex items-center gap-2 text-lg font-semibold'>
-                        <AccountCircleIcon/> Hello, sign in
+                    {
+                        user ? (
+                            <div className='w-full bg-amazon_light text-white py-3 px-6 flex items-center gap-2 text-lg font-semibold'>
+                        <AccountCircleIcon/> {user.userName}
                     </div>
+                        ) : (
+                            <div className='w-full bg-amazon_light text-white py-3 px-6 flex items-center gap-2 text-lg font-semibold'>
+                                <AccountCircleIcon/> Hello, sign in
+                            </div>
+                        )
+                    }
+                    
                     <div className='flex flex-col overflow-hidden overflow-y-auto'>
                         {/* try to change it with map after completing the project */}
                         <SideNavContent 

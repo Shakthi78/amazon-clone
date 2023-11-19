@@ -6,13 +6,32 @@ import SearchIcon from '@mui/icons-material/Search';
 import {logo} from '../../assets/index'
 import { allItems } from '../../Constants';
 import HeaderBottom from './HeaderBottom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { getAuth, signOut } from "firebase/auth";
+import { userSignOut } from '../../redux/amazonSlice';
 
 const Header = () => {
+    const auth = getAuth();
     const [showAll, setShowAll] = useState(false)
+    const dispatch = useDispatch()
     const products = useSelector((state)=>state.amazon.products)
-    console.log(products);
+    const user = useSelector((state)=>state.amazon.userInfo)
+    // console.log(products);
+    // console.log(user);
+
+    const handleLogout = ()=>{
+        signOut(auth).then(() => {
+            dispatch(userSignOut())
+            
+            // Sign-out successful.
+            console.log("done");
+          }).catch((error) => {
+            // An error happened.
+          });
+    }
+
   return (
     <div className='w-full sticky top-0 z-50'>
         <div className='w-full bg-amazon_blue text-white px-4 py-3 flex items-center gap-1'>
@@ -27,7 +46,7 @@ const Header = () => {
                 <LocationOnOutlinedIcon className='mt-3'/>
                 <p className='text-[10px] text-lightText font-light flex flex-col'>Delivering to Bengaluru<span className='font-bold text-[15px]'>Update location</span> </p>
             </div>
-
+   
             <div className='h-10 rounded-md hidden lgl:flex flex-grow relative'>
                 <span onClick={()=> setShowAll(!showAll)} className='w-14 h-full bg-gray-200 hover:bg-gray-300 border-2 cursor-pointer duration-300 text-sm text-amazon_blue font-titleFont flex items-center justify-center rounded-tl-md rounded-bl-md'>All <span></span><ArrowDropDownOutlinedIcon/></span>
                 { showAll && (
@@ -49,7 +68,13 @@ const Header = () => {
             
             <Link to='/signin'>
             <div className='headerHover flex flex-col items-start justify-center'>
-                <p className='text-sm mdl:text-xs text-white mdl:font-light'>Hello, sign in</p>
+                {
+                user ? (
+                    <p className='text-sm mdl:text-xs text-white mdl:font-light'>{user.userName}</p>
+                ) : (
+                    <p className='text-sm mdl:text-xs text-white mdl:font-light'>Hello sign in</p>
+                )
+                }
                 <p className='text-sm font-bold mt-[-2px] hidden mdl:inline-flex'>Account & Lists <span><ArrowDropDownOutlinedIcon/></span></p>
             </div>
             </Link>
@@ -67,6 +92,14 @@ const Header = () => {
                         </span></p>
                 </div>
             </Link>
+            {
+                user && (
+                    <div onClick={handleLogout} className='flex flex-col justify-center items-center headerHover relative '>
+                        <LogoutIcon/>
+                        <p className='hidden mdl:inline-flex text-xs font-semibold text-whiteText'>Logout</p>
+                    </div>
+                )
+            }
         </div>
         <HeaderBottom/>
     </div>
